@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class Result Sheet</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      text-align: center;
+      color: #333;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    button:hover {
+      background-color: #1a252f;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      display: none; /* Hidden until button is clicked */
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    .fail-row {
+      background-color: #ffe6e6;
+      color: #d9534f;
+      font-weight: bold;
+    }
+    #summary {
+      margin-top: 20px;
+      text-align: left;
+      line-height: 1.8;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Class Result Sheet</h2>
+  <button onclick="generateResults()">Generate Results</button>
+
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Total (300)</th>
+        <th>Percentage</th>
+        <th>Grade</th>
+        <th>Result</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <div id="summary"></div>
+
+  <script>
+    // Requirement 1: Store marks of five students in an array of objects
+    const students = [
+      { name: "Aarav", maths: 85, science: 88, english: 81 },
+      { name: "Diya", maths: 95, science: 92, english: 96 },
+      { name: "Karthik", maths: 68, science: 32, english: 87 }, // Fails because Science is 32
+      { name: "Meera", maths: 76, science: 74, english: 78 },
+      { name: "Rohan", maths: 52, science: 48, english: 55 }
+    ];
+
+    // Requirement 2: Function to determine grade
+    function getGrade(percent) {
+      if (percent >= 90) return "A+";
+      if (percent >= 75) return "A";
+      if (percent >= 60) return "B";
+      if (percent >= 50) return "C";
+      return "D";
+    }
+
+    // Requirement 3, 4, and 5: Generate table and summary on click
+    function generateResults() {
+      const table = document.getElementById("resultTable");
+      const tableBody = document.getElementById("tableBody");
+      const summaryDiv = document.getElementById("summary");
+
+      tableBody.innerHTML = ""; // Clear previous rows if clicked again
+      table.style.display = "table";
+
+      let totalClassPercent = 0;
+      let passedCount = 0;
+      let topper = { name: "", percent: -1 };
+
+      students.forEach(student => {
+        const total = student.maths + student.science + student.english;
+        const percent = (total / 300) * 100;
+        const formattedPercent = percent.toFixed(2);
+        const grade = getGrade(percent);
+
+        // Requirement 4: Pass only if every subject mark is 35 or above
+        const isPass = student.maths >= 35 && student.science >= 35 && student.english >= 35;
+        const resultText = isPass ? "Pass" : "Fail";
+
+        // Update summary trackers
+        totalClassPercent += percent;
+        if (isPass) passedCount++;
+        if (percent > topper.percent) {
+          topper = { name: student.name, percent: formattedPercent };
+        }
+
+        // Create table row
+        const row = document.createElement("tr");
+        if (!isPass) {
+          row.classList.add("fail-row"); // Highlight failed students in red
+        }
+
+        row.innerHTML = `
+          <td>${student.name}</td>
+          <td>${total}</td>
+          <td>${formattedPercent}%</td>
+          <td>${grade}</td>
+          <td>${resultText}</td>
+        `;
+
+        tableBody.appendChild(row);
+      });
+
+      // Requirement 5: Display topper, class average, and pass count
+      const classAverage = (totalClassPercent / students.length).toFixed(2);
+
+      summaryDiv.innerHTML = `
+        <strong>Topper:</strong> ${topper.name} (${topper.percent}%)<br>
+        <strong>Class Average:</strong> ${classAverage}%<br>
+        <strong>Passed:</strong> ${passedCount} / ${students.length} students
+      `;
+    }
+  </script>
+
+</body>
+</html>
